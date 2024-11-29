@@ -1,0 +1,30 @@
+<div class="navigation">
+    <style>
+        .navigation {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #070b0f; /* Цвет кнопки */
+            color: white; /* Цвет текста */
+            text-decoration: none; /* Убираем подчеркивание */
+            border-radius: 5px; /* Закругленные углы */
+            transition: background-color 0.3s; /* Плавный переход при наведении */
+        }
+
+    </style>
+    <div>
+    <h3>Навигация для тестового режима</h3>
+    <a href="{% url 'admin:index' %}" class="button">Администрация</a>
+    <a href="{% url 'spacestore:database' %}" class="button">База данных ассортимента</a>
+    <a href="{% url 'primary' %}" class="button">На главную</a>
+    <a href="{% url 'spacestore:store' %}" class="button">Космический магазин</a>
+    <a href="{% url 'spacestore:cart' %}" class="button">Корзина</a>
+    <a href="{% url 'spaceposts:post_list' %}" class="button">Статьи про космос</a>
+    <a href="{% url 'sign_in' %}" class="button">Регистрация</a>
+    </div>
+    <hr>

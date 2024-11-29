@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceStore</title>
+    <link rel="stylesheet" type="text/css" href="{%static 'spacestore/store.css'%}">
+
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+<h1>Космический магазин</h1>
+
+<ul>
+    {% for product in page_obj %} 
+        <li>
+            <img src="{{ product.photo.url }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px;">
+            <p>{{ product.title }} - {{ product.cost }} руб.</p>
+            <p>Размер: {{ product.size }}</p>
+            <p>Описание: {{ product.description }}</p>
+            <form action="{% url 'spacestore:buy_product' product.id %}" method="post">
+                {% csrf_token %}
+                <button  class="button" type="submit">В корзину</button>
+                <h1></h1>
+            </form>
+        </li>
+    {% empty %}
+        <p>Пусто</p>
+    {% endfor %}
+</ul>
+
+    {% include 'paginator.html' with page=page %} 
+    {% include 'footer.html' %}
+</body>
+</html>
+
+
+
+

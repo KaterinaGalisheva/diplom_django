@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'sign_in/sign_in1.css' %}">
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+
+    <h1>Регистрация</h1>
+
+    <h1>Сообщение об ошибке вы появляется<h1>
+
+    {% if info.error %}
+    <div class="error-message">
+        <h3>Ошибка</h3>
+        <h3>{{ info.error }}</h3>
+    </div>
+    {% elif info.success %}
+    <div class="success-message">
+        <h3>{{ info.success }}</h3>
+    </div>
+    {% endif %}
+
+        
+    
+    
+
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            <label for="{{ form.username.id_for_label }}">Имя пользователя:</label>
+            {{ form.username }}  
+            {% for error in form.username.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.email.id_for_label }}">Электронная почта:</label>
+            {{ form.email }}  
+            {% for error in form.email.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.birthdate.id_for_label }}">Дата рождения:</label>
+            {{ form.birthdate }}
+        </div>
+        <div>
+            <label for="{{ form.password1.id_for_label }}">Пароль:</label>
+            {{ form.password1 }}  
+            {% for error in form.password1.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.password2.id_for_label }}">Подтвердите пароль:</label>
+            {{ form.password2 }}  
+            {% for error in form.password2.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <input type="submit" value="Зарегистрироваться">
+    </form>
+
+
+    {% include 'footer.html' %}
+</body>
+</html>
