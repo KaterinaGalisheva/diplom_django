@@ -21,16 +21,18 @@ from django.conf.urls.static import static
 from spaceposts.views import *
 from spacestore.views import *
 from sign_in.views import *
+from bot_app.views import BotDataView
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('', primary, name='primary'),
     path('spaceposts/', include('spaceposts.urls')),
     path('spacestore/', include('spacestore.urls')),
-    path('sign_in/', sign_in, name='sign_in')
-
+    path('sign_in/', sign_in, name='sign_in'),
+    path('bot/', BotDataView.as_view(), name='bot_data')
 ]
 
 # Добавляем поддержку медиа-файлов в режиме отладки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

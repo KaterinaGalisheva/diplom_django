@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Bot" content="width=device-width, initial-scale=1.0">
+    <title>Bot</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navigation.html' %}
+
+    <h1>Взаимодействие с ботом</h1>
+    <form id="botForm">
+        <label for="message">Введите сообщение:</label><br>
+        <input type="text" id="message" name="message" required><br><br>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <div id="response"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#botForm').on('submit', function(event) {
+                event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+                const message = $('#message').val();
+
+                $.ajax({
+                    url: '/bot/', // Убедитесь, что этот URL соответствует вашему маршруту
+                    type: 'POST',
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRFToken': csrfToken // Добавляем CSRF-токен в заголовки
+                    },
+                    data: JSON.stringify({ message: message }),
+                    success: function(data) {
+                        $('#response').html('<strong>Ответ от бота:</strong> ' + data.response);
+                    },
+                    error: function(xhr, status, error) {
+                        $('#response').html('<strong>Ошибка:</strong> ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+    
+</body>
+</html>
+
+
