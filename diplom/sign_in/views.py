@@ -3,10 +3,16 @@ from .models import CustomUser
 from .forms import  RegistrationForm
 from django.utils import timezone
 
+import logging
+# Создание базового логирования
+logging.basicConfig(filename='errors.log', level=logging.INFO)
+
+
 
 # Create your views here.
 # функции для регистрации пользователей   
 def sign_in(request):
+    logging.info('Джанго. Пользователь начал регистрацию')
     info = {}
     
     if request.method == 'POST':
@@ -37,6 +43,7 @@ def sign_in(request):
                 user = CustomUser(username=username, birthdate=birthdate, email=email)
                 user.set_password(password1)  # Хешируем пароль
                 user.save()
+                logging.info('Джанго. Пользователь сохранен')
                 info['success'] = "Регистрация прошла успешно!"
                 return render(request, 'sign_in/sign_in.html', {'info':info, 'form':form})
        

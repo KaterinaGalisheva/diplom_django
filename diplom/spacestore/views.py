@@ -3,9 +3,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator
 from .models import *
 
+import logging
+# Создание базового логирования
+logging.basicConfig(filename='errors.log', level=logging.INFO)
+
 # Create your views here.
 # отображение базы данных на отдельной странице
 def database(request):
+    logging.info('Джанго. Просмотр базы данных')
     # подключение моделей из базы данных и сохранение
     spacestore = Spacestore.objects.all()
 
@@ -18,10 +23,12 @@ def database(request):
 
 # функции для отображения главной страницы
 def primary(request):
+    logging.info('Джанго. Просмотр главной страницы')
     return render(request, 'spacestore/primary.html')
 
 # функции для отображения магазина и пагинатора
 def store(request):
+    logging.info('Джанго. Пользователь смотрит страницу магазина')
     # Получаем количество элементов на странице, по умолчанию 2
     items_per_page = int(request.GET.get('items_per_page', 2))
     # достается список игр
@@ -48,6 +55,7 @@ def buy_product(request, product_id):
         request.session['cart'] = []
     request.session['cart'].append(product.id)
     request.session.modified = True
+    logging.info('Джанго. Корзина создана')
     return redirect('spacestore:cart')  # Перенаправление на страницу корзины
 
 
@@ -55,6 +63,7 @@ def cart(request):
     cart = request.session.get('cart', [])
     products = Spacestore.objects.filter(id__in=cart)
     total_cost = sum(product.cost for product in products)
+    logging.info('Джанго. Корзина заполнена')
     return render(request, 'spacestore/cart.html', {'products': products, 'total_cost': total_cost})
 
 
@@ -62,6 +71,7 @@ def clear_cart(request):
     if request.method == 'POST':
         # Очищаем корзину
         request.session['cart'] = []
+        logging.info('Джанго. Корзина очищена')
     return redirect('spacestore:cart')  # Перенаправляем обратно в корзину
 
 

@@ -8,9 +8,15 @@ from django.db.models import Count
 from .models import Post
 from .forms import EmailPostForm, CommentForm
 
+import logging
+# Создание базового логирования
+logging.basicConfig(filename='errors.log', level=logging.INFO)
+
+
 # Create your views here.
 # функция пагинатора для отображения статей
 def post_list(request, tag_slug=None):
+    logging.info('Джанго. Пользователь смотрит посты')
     object_list = Post.published.all()
     tag = None
 
@@ -39,6 +45,7 @@ def post_list(request, tag_slug=None):
 
 # отображение деталей поста
 def post_detail(request, year, month, day, post):
+    logging.info('Джанго. Пользователь смотрит детали поста')
     post = get_object_or_404(Post, slug=post, status='published', publish__year=year,
                              publish__month=month, publish__day=day)
     comments = post.comments.filter(active=True)
@@ -72,6 +79,7 @@ def post_detail(request, year, month, day, post):
 
 # функция отправки постов
 def post_share(request, post_id):
+    logging.info('Джанго. Пользователь хочет поделиться постом')
     # получение статьи по id
     post = get_object_or_404(Post, id=post_id, status='published')
     form = EmailPostForm(initial={
@@ -96,6 +104,7 @@ def post_share(request, post_id):
             message = f'Read "{post.title}" at {post_url}\n\n{cd["name"]}\'s comments:\n{cd["comments"]}' 
             send_mail(subject, message, 'admin@myblog.com', [cd['to']])
             sent = True
+            logging.info('Джанго. Пост отправлен')
         else:
             form = EmailPostForm()
         

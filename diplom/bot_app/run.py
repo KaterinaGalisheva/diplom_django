@@ -6,8 +6,10 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramRetryAfter
 import sys
 import os
+import io
 
 # Импортируем Django и инициализируем приложение
 import django
@@ -15,7 +17,15 @@ from django.core.management import execute_from_command_line
 from django.conf import settings
 from django.apps import apps
 import asyncio
+
 import logging
+# Создание базового логирования
+logging.basicConfig(filename='errors.log', level=logging.INFO)
+
+# установить кодировку в UTF-8
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 
 # Установка пути к проекту
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,27 +35,22 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'diplom.settings')
 
 # Инициализация Django
 django.setup()
-
-# Получаем WSGI-приложение
-from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+logging.info('Инициализация джанго')
 
 # Импортируем конфигурацию
 from config import TOKEN_API, ADMIN
 
-# Создание базового логирования
-logging.basicConfig(level=logging.INFO)
-
-# Использовать пользовательский сервер API
+'''# Использовать пользовательский сервер API
 session = AiohttpSession(proxy='http://127.0.0.1:8000/')
-
+'''
 
 
 # Инициализация бота
 # инициируем объект бота, передавая ему parse_mode=ParseMode.HTML по умолчанию
 # Благодаря такой инициации наш бот по умолчанию будет считывать HTML теги с сообщений
-bot = Bot(token=TOKEN_API, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
+bot = Bot(token=TOKEN_API)
+'''bot = Bot(token=TOKEN_API, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+'''
 storage = MemoryStorage()
 
 # Инициализация диспетчера
@@ -91,12 +96,20 @@ async def main():
     # Запуск бота
     try:
         await start_bot()
+        logging.info('запущена функция старта')
         await dp.start_polling()
+        logging.info('Бот запущен')
+    except TelegramRetryAfter as e:
+        print(f"Превышен лимит запросов. Повторная попытка через {e.retry_after} секунд.")
+        await asyncio.sleep(e.retry_after)
+        await main()
     except Exception as e:
         logging.error(f'Ошибка в основном цикле: {e}')
         await stop_bot()
     finally:
-        await bot.close()  # Закрываем бота
+        await bot.close()
+        await bot.session.close()  # Закрываем сессию
+        logging.info('Бот остановлен')  # Закрываем бота
         await storage.close()  # Закрываем хранилище
 
 
@@ -104,14 +117,18 @@ async def main():
 async def run_django():
     try:
         execute_from_command_line(['manage.py', 'runserver', '127.0.0.1:8000'])
+        logging.info('Джанго запущен')
     except Exception as e:
         logging.error(f'Ошибка при запуске Django: {e}')
 
 if __name__=='__main__':
     # Запуск в asyncio
     loop = asyncio.get_event_loop()
+    logging.info('Запуск асинкио')
     loop.create_task(run_django())  # Запускаем Django в фоновом режиме
+    logging.info('Запуск джанго')
     loop.run_until_complete(main())  # Запускаем бота
+    logging.info('Запуск бота')
     
     # cd bot_app
     # python run.py

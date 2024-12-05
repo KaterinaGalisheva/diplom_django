@@ -48,12 +48,14 @@ ik_button_info_store = InlineKeyboardMarkup(
      )
 
 # создать клавиатуру с множеством кнопок из списка
-store = Spacestore.objects.all()
 async def inline_store():
+    store = Spacestore.objects.all()
     keyboard = InlineKeyboardBuilder()
-    for item in store:
-        keyboard.add(InlineKeyboardButton(text=f"{item.photo}/n {item.title} - {item.cost} руб.", callback_data = f'choose_{item.title}'))
-
+    if item.photo and item.title and item.cost is not None:
+        for item in store:
+            button_text = f"{item.photo}\n{item.title} - {item.cost} руб."
+            keyboard.add(InlineKeyboardButton(text=button_text, callback_data = f'choose_{item.title}'))
+    # Настраиваем клавиатуру на 2 кнопки в ряд
     return keyboard.adjust(2).as_markup()
 
 # создаем инлайн клавиатуру для каталог товаров

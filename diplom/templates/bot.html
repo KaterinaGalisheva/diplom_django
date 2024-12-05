@@ -1,9 +1,10 @@
+# bot.html
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="Bot" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bot</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -17,6 +18,10 @@
             border: 1px solid #ccc;
             background-color: #f9f9f9;
         }
+        #loading {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -29,12 +34,16 @@
         <button type="submit">Отправить</button>
     </form>
 
+    <div id="loading">Отправка...</div>
     <div id="response"></div>
 
     <script>
         $(document).ready(function() {
+            const csrfToken = '{{ csrf_token }}'; // Получаем CSRF-токен
+
             $('#botForm').on('submit', function(event) {
                 event.preventDefault(); // Предотвращаем стандартное поведение формы
+                $('#loading').show(); // Показываем индикатор загрузки
 
                 const message = $('#message').val();
 
@@ -51,13 +60,13 @@
                     },
                     error: function(xhr, status, error) {
                         $('#response').html('<strong>Ошибка:</strong> ' + xhr.responseText);
+                    },
+                    complete: function() {
+                        $('#loading').hide(); // Скрываем индикатор загрузки
                     }
                 });
             });
         });
     </script>
-    
 </body>
 </html>
-
-

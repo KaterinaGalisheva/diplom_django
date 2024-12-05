@@ -12,11 +12,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from asgiref.sync import sync_to_async
 # и импорт из файлов
+from spacestore.models import Spacestore
 from sign_in.models import CustomUser
 import bot_app.keyboards as kb
 from bot_app import text
 from bot_app.config import ADMIN
 
+# Создание базового логирования
+logging.basicConfig(filename='errors.log', level=logging.INFO)
+logging.info('Сработала кнопка покупки товаров')
 
 
 
@@ -30,19 +34,21 @@ host = 'http://127.0.0.1:8000/bot/'
 # вызываем появление приветственной клавиатуры при открытии бота при команде /start
 @router_client.message(CommandStart())
 async def start(message: Message):
+    logging.info('Сработала команда старт')
     # добавляем клиента в базу данных
     telegram_user, created = await CustomUser.objects.aget_or_create(id=message.from_user.id, username=message.from_user.username)
+    logging.info('Клиент добавлен в базу данных')
     await sync_to_async(telegram_user.get_user)()
     welcome_message = f"Добро пожаловать, {message.from_user.username}! ❤️ " + text.start
     await message.answer(welcome_message)
+    logging.info('Отправлено приветственное письмо')
 
     if created:
-        logging.info("New user created")
+        logging.info("Создан новый пользователь")
     else:
-        logging.info("User already exists")
+        logging.info("Пользователь не создан тк уже был создан")
     await message.answer(reply_markup=kb.ik_button_info_store())  
-    
-    
+
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
     if response.status_code == 200:
@@ -53,8 +59,9 @@ async def start(message: Message):
 # команда help
 @router_client.message(Command("help"))
 async def help_command(message: Message):
+    logging.info('Сработала команда хелп')
     help_text = (
-        "Это бот, который поможет вам с различными задачами. Вот некоторые команды, которые вы можете использовать:\n"
+        "Это бот, который поможет вам. Вот некоторые команды, которые вы можете использовать:\n"
         "/start - начать работу с ботом\n"
         "/help - получить помощь\n"
         "/info - получить информацию о боте\n"
@@ -62,6 +69,7 @@ async def help_command(message: Message):
         # Добавьте другие необходимые команды
     )
     await message.answer(help_text)
+    logging.info('Отправлен текст хелп')
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
     if response.status_code == 200:
@@ -72,6 +80,7 @@ async def help_command(message: Message):
 # Command to show user profile
 @router_client.message(Command("profile"))
 async def profile_command(message: Message):
+    logging.info('Сработала команда профиль')
     from sign_in.models import CustomUser
     telegram_user = await CustomUser.objects.aget(chat_id=message.from_user.id)
     profile_info = (
@@ -81,12 +90,15 @@ async def profile_command(message: Message):
         # Добавьте другие поля, если есть
     )
     await message.answer(profile_info)
+    logging.info('Отправлен текст профиль')
 
 # Displays information about the bot
 @router_client.message(Command("info"))
 async def info_command(message: Message):
-    info_text = "Этот бот предназначен для помощи пользователям в различных задачах."
+    logging.info('Сработала команда инфо')
+    info_text = "Этот бот предназначен для покупки товаров из космического магазина."
     await message.answer(info_text)
+    logging.info('Отправлен текст инфо')
 
 # прописываем простые фильтры
 @router_client.message(F.text == 'Привет') 
@@ -145,6 +157,7 @@ async def store_info(message: Message):
 # если нажать часы работы
 @router_client.message(F.data == 'grafik')
 async def grafik(message: Message):
+    logging.info('Сработала кнопка график')
     await message.answer(text.grafik_info, reply_markup = kb.ik_button_info_store)
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
@@ -157,6 +170,7 @@ async def grafik(message: Message):
 # если нажать адрес
 @router_client.message(F.data == 'adress')
 async def adress(message: Message):
+    logging.info('Сработала кнопка адрес')
     await message.answer(text.adress_info, reply_markup = kb.ik_button_info_store)
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
@@ -169,6 +183,7 @@ async def adress(message: Message):
 # если нажать доставка
 @router_client.message(F.data == 'delivery')
 async def delivery(message: Message):
+    logging.info('Сработала кнопка доставки')
     await message.answer(text.delivery_info, reply_markup = kb.ik_button_info_store)
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
@@ -188,6 +203,7 @@ async def delivery(message: Message):
 # обработчик кнопки Связь с оператором
 @router_client.message(F.text == 'Связь с оператором')
 async def connect(message: Message):
+    logging.info('Сработала кнопка связь с оператором')
     await message.answer(f"Уважаемый, {message.from_user.username}! Оператор подключится в ближайшее время! ")
     await message.answer()
     # Отправка данных на Django API
@@ -202,11 +218,13 @@ async def connect(message: Message):
 # обработчик кнопки Каталог товаров
 @router_client.message(F.text == 'Каталог товаров')
 async def show_items(message: Message):
+    logging.info('Сработала кнопка покупки товаров')
     try:
         # Отправляем запрос на получение инлайн-клавиатуры
         inline_keyboard = await kb.inline_store()
         await message.answer(reply_markup=inline_keyboard)
-
+        logging.info('Отправлены кнопки с товарами')
+        
         # Отправка данных на Django API
         response = requests.post(host, json={'user_id': message.from_user.id})
         if response.status_code == 200:
@@ -222,21 +240,23 @@ async def show_items(message: Message):
 
 # обработчик кнопки ТОВАР
 # сделать так, чтобы после срабатывания инлайн клавиатуры, в ней появлялась другая инлайн клавиатура
-@router_client.callback_query(F.data == f'choose_Spacestore.title') 
+@router_client.callback_query(lambda call: call.data.startswith('choose_')) 
 async def product(call: CallbackQuery, state: FSMContext):
+    logging.info('Сработала кнопка с товаром')
     try:
         # Изменяем текст сообщения и показываем новую инлайн-клавиатуру
-        await call.message.edit_text(reply_markup=await kb.ik_button_catalog())
+        await call.message.edit_text("Вы выбрали товар. Пожалуйста, выберите действие:", reply_markup=await kb.ik_button_catalog())
+        logging.info('Появилась новая клавиатура с инлайн товаром')
         
         # Отправка данных на Django API
         response = requests.post(host, json={'user_id': call.from_user.id})
         if response.status_code == 200:
-            await call.reply("Данные успешно отправлены на сервер.")
+            await call.answer("Данные успешно отправлены на сервер.")
         else:
-            await call.reply("Ошибка при отправке данных.")
+            await call.answer("Ошибка при отправке данных.")
     except Exception as e:
         logging.error(f"Error in product callback: {e}")  # Логируем ошибку
-        await call.reply("Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.")
+        await call.answer("Произошла ошибка при обработке вашего запроса. Пожалуйста, попробуйте позже.")
 
 
 
@@ -249,8 +269,9 @@ async def product(call: CallbackQuery, state: FSMContext):
 # если нажать Подробное описание
 @router_client.message(F.data == 'description')
 async def description(call: CallbackQuery, state: FSMContext):
-    from spacestore.models import Spacestore
-    await call.answer(Spacestore.object.description) 
+    logging.info('Сработала кнопка описания товаров')
+    product_description = Spacestore.objects.get(id=call.data.split('_')[1]).description  
+    await call.answer(product_description)
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': call.from_user.id})
     if response.status_code == 200:
@@ -277,6 +298,7 @@ class Reg(StatesGroup):
 
 @router_client.message(F.data == 'buy')
 async def buy(message: types.Message, state: FSMContext):
+    logging.info('Запустился процесс покупки товара')
     await message.answer('Заполните небольшую форму для покупки товара: ') 
     await message.answer('Введите Ваше имя:') 
     await state.set_state(Reg.name)
@@ -308,6 +330,7 @@ async def reg_4(message: types.Message, state: FSMContext):
 # Сохраняет номер телефона и создает блок данных
 @router_client.message(Reg.phone_number)
 async def reg_7(message: types.Message, state: FSMContext):
+    from bot_app.run import bot
     phone_number = message.text
     if not phone_number.startswith("+"):
         phone_number = phone_number
@@ -334,7 +357,8 @@ async def reg_7(message: types.Message, state: FSMContext):
     await message.answer('Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время.')
     
     # отправляем сообщение администратору 
-    #await bot.send_message(ADMIN, f"Новое сообщение: {order_info}")
+    await bot.send_message(ADMIN, f"Новое сообщение: {order_info}")
+    logging.info('Сообщение отправлено администратору')
   
     # Отправка данных на Django API
     response = requests.post(host, json={'user_id': message.from_user.id})
@@ -359,6 +383,7 @@ async def reg_7(message: types.Message, state: FSMContext):
 # хендлер, который удаляет плохие слова
 @router_client.message() # пустой хендлер в конец!!!
 async def echo_send(message: Message):
+    logging.info('Сработал ценз')
     # генератор множества
     if {i.lower().translate(str.maketrans('', '', string.punctuation )) for i in message.text.split(' ')}\
         .intersection(set(json.load(open('cenz.cenz.json')))) != set():
