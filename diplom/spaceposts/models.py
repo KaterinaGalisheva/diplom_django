@@ -20,7 +20,7 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='media/post_images/', blank=True, null=True)
     objects = models.Manager()
     published = PublishedManager()
     tags = TaggableManager()

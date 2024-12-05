@@ -12,7 +12,7 @@ logging.basicConfig(filename='errors.log', level=logging.INFO)
 # функции для регистрации пользователей   
 def sign_in(request):
     logging.info('Джанго. Пользователь начал регистрацию')
-    info = {}
+    info = {'error':'текст не отображается'}
     
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -44,9 +44,14 @@ def sign_in(request):
                 logging.info('Джанго. Пользователь сохранен')
                 info['success'] = "Регистрация прошла успешно!"
                 return render(request, 'sign_in/sign_in.html', {'info':info, 'form':form})
-       
+        else:
+            # Если форма не валидна
+            info['error'] = form.errors.as_json()
+            logging.info('Форма не валидна: %s', form.errors)
+
+
     else:
-        form = RegistrationForm() 
+            form = RegistrationForm() 
     
     return render(request, 'sign_in/sign_in.html', {'info':info, 'form':form})
 

@@ -110,7 +110,7 @@ async def main():
         await bot.close()
         await bot.session.close()  # Закрываем сессию
         logging.info('Бот остановлен')  # Закрываем бота
-        await storage.close()  # Закрываем хранилище
+        await storage.close()  # Закрываем хранилище'''
 
 
 # Функция для запуска Django
