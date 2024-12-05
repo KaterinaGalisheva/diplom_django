@@ -60,7 +60,6 @@ def extract_number(text):
 class Form(StatesGroup):
     username = State()
     email = State()
-    birthdate = State()
     password1 = State()
     password2 = State()
     
@@ -68,7 +67,7 @@ router_sign_in = Router()!!!!!!!!!!! bcghfdbnm dtplt
 @questionnaire_router.message(Command('start_questionnaire'))
 async def start_questionnaire_process(message: Message, state: FSMContext):
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         await message.answer('Привет. Напиши как тебя зовут: ')
     await state.set_state(Form.username)
 
@@ -77,7 +76,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 async def capture_name(message: Message, state: FSMContext):
     await state.update_data(username=message.text)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         await message.answer('Теперь напиши свой email: ')
     await state.set_state(Form.email)
 
@@ -85,21 +84,7 @@ async def capture_name(message: Message, state: FSMContext):
 async def capture_email(message: Message, state: FSMContext):
     await state.update_data(email=message.text)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
-        await message.answer('Теперь напиши дату рождения YYYY-MM-DD: ')
-        await state.set_state(Form.birthdate)
-
-        
-@questionnaire_router.message(F.text, Form.birthdate)
-async def capture_birthdate(message: Message, state: FSMContext):
-    check_birthday = extract_number(message.text)
-    # добавить логику для даты типа
-    # if (timezone.now().date() - birthdate).days < 18 * 365:
-        await message.reply('Приходите, когда вам исполнится 18 лет')
-        return
-    await state.update_data(birthday=check_birthdate)
-    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         await message.answer('Теперь напиши пароль более 6 символов: ')
     await state.set_state(Form.password1)
 
@@ -108,7 +93,7 @@ async def capture_birthdate(message: Message, state: FSMContext):
 async def capture_password1(message: Message, state: FSMContext):
     await state.update_data(password1=message.text)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         await message.answer('Повтори пароль: ')
         await state.set_state(Form.password2)
 
@@ -117,7 +102,7 @@ async def capture_password1(message: Message, state: FSMContext):
 async def capture_password2(message: Message, state: FSMContext):
     await state.update_data(password2=message.text)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         
 
 # проверка данных
@@ -130,7 +115,6 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
     caption = f'Пожалуйста, проверьте все ли верно: \n\n' \
               f'<b>Полное имя</b>: {data.get("username")}\n' \
               f'<b>email</b>: {data.get("email")}\n' \
-              f'<b>birthdate</b>: {data.get("birthdate")} \n' \
               f'<b>password1</b>: {data.get("password1")}\n' \
               f'<b>password2</b>: {data.get("password2")}'
 
@@ -141,7 +125,7 @@ async def start_questionnaire_process(message: Message, state: FSMContext):
 @questionnaire_router.callback_query(F.data == 'correct', Form.check_state)
 async def start_questionnaire_process(call: CallbackQuery, state: FSMContext):
     # Создание пользователя
-            user = CustomUser(username=username, birthdate=birthdate, email=email)
+            user = CustomUser(username=username, email=email)
             user.set_password(password1)  # Хешируем пароль
             user.save()
     await call.answer('Данные сохранены')

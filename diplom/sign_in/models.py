@@ -3,5 +3,5 @@ from django.db import models
 
 # Create your models here.
 class CustomUser(AbstractUser):
-    birthdate = models.DateField(null=True, blank=True)
+    pass
     
