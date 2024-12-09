@@ -1,4 +1,4 @@
-'''import logging
+import logging
 from aiogram import Router
 from aiogram.exceptions import (Unauthorized, InvalidQueryID, TelegramAPIError,
                                       CantDemoteChatCreator, MessageNotModified, MessageToDeleteNotFound,
@@ -9,8 +9,8 @@ from aiogram.exceptions import (Unauthorized, InvalidQueryID, TelegramAPIError,
 
 router_errors = Router()
 
-Этот код предназначен для обработки ошибок, возникающих при взаимодействии с Telegram API. 
-Он позволяет логировать различные типы ошибок, что помогает в отладке и мониторинге работы бота.
+'''Этот код предназначен для обработки ошибок, возникающих при взаимодействии с Telegram API. 
+Он позволяет логировать различные типы ошибок, что помогает в отладке и мониторинге работы бота.'''
 
 @router_errors.errors_handler()
 async def errors_handler(update, exception):
@@ -59,4 +59,4 @@ async def errors_handler(update, exception):
         logging.exception(f'CantParseEntities: {exception} \nUpdate: {update}')
         return True
     
-    logging.exception(f'Update: {update} \n{exception}')'''
+    logging.exception(f'Update: {update} \n{exception}')

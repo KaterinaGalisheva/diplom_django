@@ -9,12 +9,6 @@ from django.contrib.auth.admin import UserAdmin
 #  в декораторе автоматически регистрируете модель с классом админки
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    # Добавляем поле для регистрации
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('birthdate',)}),  
-    )
-    # Добавляем поле для редактирования
-    fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('birthdate',)}),  
-    )
+    list_display = ('id', 'username', 'email')
+    list_display_links = ('id', 'username', 'email')
 
