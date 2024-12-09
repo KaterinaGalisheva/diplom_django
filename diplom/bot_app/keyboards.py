@@ -33,7 +33,8 @@ async def inline_cars():
 main_menu = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text = 'Информация о магазине')],
     [KeyboardButton(text = 'Связь с оператором')],
-    [KeyboardButton(text = 'Каталог товаров')]
+    [KeyboardButton(text = 'Каталог товаров')],
+    [KeyboardButton(text = 'Регистрация')]
 ], resize_keyboard=True, input_field_placeholder='Выберите пункт меню')
 
 
@@ -60,12 +61,24 @@ def create_catalog_keyboard(product_id):
 #-----------------ADMIN-----------------------
 
 # клавиатура для администратора
-admin_panel = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Клиенты", callback_data="users")],
-    [InlineKeyboardButton(text="Статистика", callback_data="stat")],
-    [InlineKeyboardButton(text="Удалить пользователя", callback_data="block")]])
+admin_panel = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="Клиенты")],
+    [KeyboardButton(text="Рассылка")],
+    [KeyboardButton(text="Удалить пользователя")]], 
+    resize_keyboard=True, input_field_placeholder='Выберите пункт меню')
 
 
 
 #-----------------END-ADMIN--------------------
 
+
+#-----------------SIGN_IN-----------------------
+# Инлайн-клавиатура проверки заполнения данных:
+check_data = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Все верно", callback_data='correct'),
+            InlineKeyboardButton(text="❌ Заполнить сначала", callback_data='incorrect')
+        ]
+    ]
+)

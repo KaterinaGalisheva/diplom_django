@@ -51,6 +51,8 @@ from config import TOKEN_API, ADMIN
 # Благодаря такой инициации наш бот по умолчанию будет считывать HTML теги с сообщений
 bot = Bot(token=TOKEN_API)
 '''session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML)'''
+
+
 storage = MemoryStorage()
 
 # Инициализация диспетчера
@@ -60,16 +62,16 @@ dp = Dispatcher(storage=storage)
 dp.update.storage = storage
 
 # Импортируем роутеры из других модулей
-from bot_app.handlers.client import router_client as client_router
-from bot_app.handlers.admin import router_admin as admin_router
-from bot_app.handlers.errors import router_errors as errors_router
-#from bot_app.handlers.sign_in import router_sign_in as sign_in_router
+from bot_app.handlers.client import router_client
+from bot_app.handlers.admin import router_admin
+from bot_app.handlers.sign_in import router_sign_in
+from bot_app.handlers.other import router_other
 
 # Регистрация роутеров
-dp.include_router(client_router)
-dp.include_router(admin_router)
-dp.include_router(errors_router)
-#dp.include_router(sign_in_router)    
+dp.include_router(router_client)
+dp.include_router(router_admin)
+dp.include_router(router_sign_in)  
+dp.include_router(router_other)    
 
 
 

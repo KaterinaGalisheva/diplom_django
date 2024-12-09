@@ -1,9 +1,7 @@
 
 import logging
 import os
-import requests
-import string
-import json
+import httpx
 from aiogram import  Router, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
@@ -14,6 +12,7 @@ from django.conf import settings
 # и импорт из файлов
 from spacestore.models import get_items_from_db, get_item_description_from_db, get_item_title_from_db
 from sign_in.models import CustomUser
+from bot_app.models import Notification
 import bot_app.keyboards as kb
 from bot_app import text
 from bot_app.config import ADMIN
@@ -25,18 +24,24 @@ logging.basicConfig(filename='errors.log', level=logging.INFO)
 router_client = Router()
 
 
+
+
+
 #-----------------CLIENT--------------------
 
 # вызываем появление приветственной клавиатуры при открытии бота при команде /start
 @router_client.message(CommandStart())
-async def start(message: Message):
-    await State.set_state(None)
+async def start(message: Message, state: FSMContext):
+    await state.clear()
     logging.info('Сработала команда старт')
     
     # добавляем клиента в базу данных
-    telegram_user, created = await CustomUser .objects.aget_or_create(
+    '''telegram_user, created = await CustomUser.objects.aget_or_create(
         id=message.from_user.id,
         username=message.from_user.username
+    )'''
+    telegram_user, created = await Notification.objects.aget_or_create(
+        user_id=message.from_user.id
     )
     logging.info('Клиент добавлен в базу данных')
     
@@ -54,8 +59,8 @@ async def start(message: Message):
     
 # команда help
 @router_client.message(Command("help"))
-async def help_command(message: Message):
-    await State.set_state(None)
+async def help_command(message: Message, state: FSMContext):
+    await state.clear()
     logging.info('Сработала команда хелп')
     help_text = (
         "Это бот, который поможет вам. Вот некоторые команды, которые вы можете использовать:\n"
@@ -71,8 +76,8 @@ async def help_command(message: Message):
 
 # Displays information about the bot
 @router_client.message(Command("info"))
-async def info_command(message: Message):
-    await State.set_state(None)
+async def info_command(message: Message, state: FSMContext):
+    await state.clear()
     logging.info('Сработала команда инфо')
     info_text = "Этот бот предназначен для покупки товаров из космического магазина."
     await message.answer(info_text)
@@ -81,8 +86,8 @@ async def info_command(message: Message):
     
 # обработчик кнопки информация об магазине
 @router_client.message(F.text == 'Информация о магазине')
-async def store_info(message: Message):
-    await State.set_state(None)
+async def store_info(message: Message, state: FSMContext):
+    await state.clear()
     await message.answer(text.info, reply_markup = kb.ik_button_info_store)
    
 
@@ -122,16 +127,16 @@ async def delivery(callback_query: CallbackQuery):
 
 # обработчик кнопки Связь с оператором
 @router_client.message(F.text == 'Связь с оператором')
-async def connect(message: Message):
-    await State.set_state(None)
+async def connect(message: Message, state: FSMContext):
+    await state.clear()
     logging.info('Сработала кнопка связь с оператором')
     await message.answer(f"Уважаемый, {message.from_user.username}! Оператор подключится в ближайшее время! ")
 
 
 # обработчик кнопки Каталог товаров
 @router_client.message(F.text == 'Каталог товаров')
-async def show_items(message: Message):
-    await State.set_state(None)
+async def show_items(message: Message, state: FSMContext):
+    await state.clear()
     logging.info('Сработала кнопка покупки товаров')
     
     store = await get_items_from_db()  # Получаем товары из базы данных
@@ -257,36 +262,8 @@ async def reg_7(message: types.Message, state: FSMContext):
     # Завершаем состояние
     await state.set_state(None)  # Устанавливает состояние в None
 
-    
-
 
 '''----------------КОНЕЦ ОФОРМЛЕНИЯ ЗАКАЗА-------------'''   
     
 
-
-#----------------OTHER------------------------
-
-# хендлер, который удаляет плохие слова
-@router_client.message() # пустой хендлер в конец!!!
-async def echo_send(message: Message):
-    logging.info('Сработал ценз')
-    # генератор множества    
-    with open('cenz/cenz.json', 'r') as file:
-            bad_words = set(json.load(file))
-
-    # Генератор множества
-    if {i.lower().translate(str.maketrans('', '', string.punctuation)) for i in message.text.split(' ')}\
-        .intersection(bad_words) != set():
-        await message.reply('Не ругайся 💔')
-        await message.delete()
-    else:
-        await message.answer('Извините, я не понимаю это сообщение.' + text.help)
-#----------------END-OTHER------------------------
-
-
-# в конце, ответ на любое несистемное сообщение
-@router_client.message() 
-async def all_message(message: Message):
-    await message.answer('👩 Если у вас остались вопросы, напишите мне @clevereej')
-    
 #-----------------END-CLIENT--------------------
